@@ -34,13 +34,14 @@ html, body {
 }
 
 body {
-  background:url('../img/loginbg.jpg') center center / auto 100% no-repeat;
+  background: linear-gradient(rgba(161, 161, 161, 0.5), rgba(161, 161, 161, 0.5)), 
+             url('../img/loginbg.png') center center / auto 100% no-repeat;
   font-size: 14px;
   font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 400;
   line-height: 1.1;
   color: #333;
-  background-color: #fff;
+  background-color: #4a5748;
   overflow-x: hidden;
   overflow-y: auto
 }
@@ -274,32 +275,18 @@ a:focus {
 
 .btn-info {
   color: #fff;
-  background-color: #5bc0de;
+  background-color: #01d7a7;
   border-color: #46b8da
 }
 
-.btn-info:focus {
-  color: #fff;
-  background-color: #31b0d5;
-  border-color: #1b6d85
-}
-
-.btn-info:hover {
-  color: #fff;
-  background-color: #31b0d5;
-  border-color: #269abc
-}
-
+.btn-info:hover,
 .btn-info:active {
-  color: #fff;
-  background-color: #31b0d5;
+  background-color: #02c69b;
   border-color: #269abc
 }
 
-.btn-info:active:focus,
-.btn-info:active:hover {
-  color: #fff;
-  background-color: #269abc;
+.btn-info:focus {
+  background-color: #02c69b;
   border-color: #1b6d85
 }
 
@@ -339,7 +326,7 @@ a:focus {
   outline: none
 }
 
-.btn-info {
+/* .btn-info {
   background-color: #00c0ef;
   border-color: #00acd6
 }
@@ -347,7 +334,7 @@ a:focus {
 .btn-info:hover,
 .btn-info:active {
   background-color: #00acd6
-}
+} */
 
 .login-box-body {
   background: #fff;
@@ -363,7 +350,7 @@ a:focus {
 }
 
 .logWelC {
-  color: #00c0ef;
+  color: #01d7a7;
   font-size: 22px;
   font-weight: bold;
   text-transform: uppercase;
@@ -394,8 +381,8 @@ a:focus {
 }
 
 .logoLogin {
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin-top: 2px;
+  margin-bottom: 10px;
 }
 
 @media only screen and (max-width:990px) {
