@@ -7,7 +7,7 @@
  2. Django 2.0 or above
 
 #### Run on your local machine by:
-* `git clone https://github.com/PROxZIMA/TimetableScheduler.git/`
+* `git clone https://github.com/deep-g/Timetable-Scheduler.git`
 * `cd TimetableScheduler`
 * `python manage.py runserver`
 * then go to port `http://127.0.0.1:8000/` to run the local server
