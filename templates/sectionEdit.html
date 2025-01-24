@@ -18,7 +18,6 @@
         <tr class="table-headers">
           <th>Section Id</th>
           <th>Department</th>
-          <th>Total Classes</th>
           <th class="empty"></th>
         </tr>
       </thead>
@@ -28,7 +27,6 @@
         <tr>
           <td>{{sec.section_id}}</td>
           <td>{{sec.department}}</td>
-          <td>{{sec.num_class_in_week }}</td>
           <td class="empty">
             <form action="{% url 'deletesection' sec.section_id %}" method="post">
               {% csrf_token %}

@@ -54,7 +54,7 @@ class CourseForm(ModelForm):
         model = Course
         labels = {'max_numb_students': 'Maximum students'}
         fields = [
-            'course_number', 'course_name', 'max_numb_students', 'instructors'
+            'course_number', 'course_name', 'max_numb_students', 'classes_per_week', 'instructors'
         ]
 
 
@@ -68,5 +68,5 @@ class DepartmentForm(ModelForm):
 class SectionForm(ModelForm):
     class Meta:
         model = Section
-        labels = {'num_class_in_week': 'Total classes in a week'}
-        fields = ['section_id', 'department', 'num_class_in_week']
+        # labels = {'num_class_in_week': 'Total classes in a week'}
+        fields = ['section_id', 'department']

@@ -130,18 +130,13 @@ class Schedule:
         sections = Section.objects.all()
         for section in sections:
             dept = section.department
-            n = section.num_class_in_week
 
-            if n > len(data.get_meetingTimes()):
-                n = len(data.get_meetingTimes())
 
             courses = dept.courses.all()
             for course in courses:
-                for i in range(n // len(courses)):
+                for i in range(course.classes_per_week):
                     self.addCourse(data, course, courses, dept, section)
 
-            for course in courses.order_by('?')[:(n % len(courses))]:
-                self.addCourse(data, course, courses, dept, section)
 
         return self
 
@@ -391,11 +386,12 @@ def courseAdd(request):
 @login_required
 def courseEdit(request):
     instructor = defaultdict(list)
-    for course in Course.instructors.through.objects.all():
-        course_number = course.course_id
-        instructor_name = Instructor.objects.filter(
-            id=course.instructor_id).values('name')[0]['name']
-        instructor[course_number].append(instructor_name)
+    course_instructors = Course.instructors.through.objects.select_related('course', 'instructor')
+
+    for course_relation in course_instructors:
+        course_obj = course_relation.course  # Access the Course object
+        instructor_name = course_relation.instructor.name  # Access Instructor object
+        instructor[course_obj.course_number].append(instructor_name)  # Append the instructor name
 
     context = {'courses': Course.objects.all(), 'instructor': instructor}
     return render(request, 'courseEdit.html', context)
