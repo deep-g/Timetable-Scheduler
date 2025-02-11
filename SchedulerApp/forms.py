@@ -68,5 +68,4 @@ class DepartmentForm(ModelForm):
 class SectionForm(ModelForm):
     class Meta:
         model = Section
-        # labels = {'num_class_in_week': 'Total classes in a week'}
-        fields = ['section_id', 'department']
+        fields = ['section_id', 'department', 'non_meeting_times']

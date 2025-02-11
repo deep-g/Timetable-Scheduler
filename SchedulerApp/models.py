@@ -46,7 +46,7 @@ class MeetingTime(models.Model):
     pid = models.CharField(max_length=4, primary_key=True)
     time = models.CharField(max_length=50,
                             choices=TIME_SLOTS,
-                            default='11:30 - 12:30')
+                            default='11:00 - 12:00')
     day = models.CharField(max_length=15, choices=DAYS_OF_WEEK)
 
     def __str__(self):
@@ -79,6 +79,7 @@ class Department(models.Model):
 class Section(models.Model):
     section_id = models.CharField(max_length=25, primary_key=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    non_meeting_times = models.ManyToManyField(MeetingTime, related_name="unavailable_for_sections", blank=True)
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                blank=True,

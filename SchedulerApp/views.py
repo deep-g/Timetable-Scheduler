@@ -1,5 +1,5 @@
 from django.http.response import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -58,9 +58,10 @@ class Class:
         self.department = dept
         self.course = course
         self.instructor = None
-        self.meeting_time = None
         self.room = None
         self.section = section
+        self.valid_meeting_times = self.get_valid_meeting_times()
+        self.meeting_time = random.choice(self.valid_meeting_times) if self.valid_meeting_times else None
 
     def get_id(self):
         return self.section_id
@@ -84,11 +85,18 @@ class Class:
         self.instructor = instructor
 
     def set_meetingTime(self, meetingTime):
-        self.meeting_time = meetingTime
+        if meetingTime in self.valid_meeting_times:
+            self.meeting_time = meetingTime
+        else:
+            raise ValueError(f"Invalid meeting time: {meetingTime} for section {self.section}")
 
     def set_room(self, room):
         self.room = room
-
+    
+    def get_valid_meeting_times(self):
+        all_meeting_times = list(MeetingTime.objects.all())
+        non_meeting_times = list(self.section.non_meeting_times.all())
+        return [t for t in all_meeting_times if t not in non_meeting_times]
 
 class Schedule:
     def __init__(self):
@@ -112,10 +120,16 @@ class Schedule:
         return self._fitness
 
     def addCourse(self, data, course, courses, dept, section):
-        newClass = Class(dept, section.section_id, course)
+        newClass = Class(dept, section, course)
 
-        newClass.set_meetingTime(
-            data.get_meetingTimes()[random.randrange(0, len(data.get_meetingTimes()))])
+        all_meeting_times = data.get_meetingTimes()
+        non_meeting_times = list(section.non_meeting_times.all())
+        valid_meeting_times = [t for t in all_meeting_times if t not in non_meeting_times]
+
+        if valid_meeting_times:
+            newClass.set_meetingTime(random.choice(valid_meeting_times))
+        else:
+            raise ValueError(f"No valid meeting times available for section {section}")
 
         newClass.set_room(
             data.get_rooms()[random.randrange(0, len(data.get_rooms()))])
@@ -451,9 +465,19 @@ def sectionAdd(request):
 
 
 @login_required
-def sectionEdit(request):
-    context = {'sections': Section.objects.all()}
-    return render(request, 'sectionEdit.html', context)
+def sectionEdit(request, pk=None):
+    if pk:
+        section = get_object_or_404(Section, pk=pk)
+        form = SectionForm(request.POST or None, instance=section)
+        if request.method == 'POST':
+            if form.is_valid():
+                form.save()
+                return redirect('sectionEdit', pk=pk)
+        context = {'form': form, 'section': section}
+        return render(request, 'sectionEditForm.html', context)
+    else:
+        context = {'sections': Section.objects.all()}
+        return render(request, 'sectionEdit.html', context)
 
 
 @login_required

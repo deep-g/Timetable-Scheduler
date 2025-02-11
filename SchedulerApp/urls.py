@@ -27,7 +27,8 @@ urlpatterns = [
 
     path('sectionAdd/', sectionAdd, name='sectionAdd'),
     path('sectionEdit/', sectionEdit, name='sectionEdit'),
-    path('sectionDelete/<str:pk>/', sectionDelete, name='deletesection'),
+    path('section/edit/<str:pk>/', sectionEdit, name='sectionEdit'),  # Edit specific section
+    path('section/delete/<str:pk>/', sectionDelete, name='sectionDelete'),
 
     path('api/genNum/', apiGenNum, name='apiGenNum'),
     path('api/terminateGens/', apiterminateGens, name='apiterminateGens')

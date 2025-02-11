@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% load index %}
+
+<fieldset class="fieldset">
+    <div class="tablink">
+        <a href="{% url 'sectionAdd' %}">
+            <h1>Add Section</h1>
+        </a>
+        <a href="{% url 'sectionEdit' %}">
+            <h1>Edit Section</h1>
+        </a>
+    </div>
+    <div class="tabcontent" id="edit">
+        <table class="editTable">
+            <thead>
+                <tr class="table-headers">
+                    <th>Section Id</th>
+                    <th>Non-Meeting Time</th>
+                    <th class="empty"></th>
+                  </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ section.section_id }}</td>
+                    <td>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{form.as_p}}                          
+                            <button type="submit">Save Changes</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</fieldset>
+
+{% endblock %}
