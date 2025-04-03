@@ -27,8 +27,16 @@ DAYS_OF_WEEK = (
 
 
 class Room(models.Model):
+    ROOM_TYPES = [
+            ('lecture', 'Lecture Room'),
+            ('lab', 'Lab Room'),
+        ]  
+      
     r_number = models.CharField(max_length=6)
     seating_capacity = models.IntegerField(default=0)
+    room_type = models.CharField(max_length=10,
+                                 choices=ROOM_TYPES,
+                                 default='lecture')
 
     def __str__(self):
         return self.r_number
@@ -59,6 +67,7 @@ class Course(models.Model):
     max_numb_students = models.IntegerField(default=0)
     classes_per_week = models.IntegerField(default=3)
     instructors = models.ManyToManyField(Instructor)
+    is_lab = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.course_number} {self.course_name} {self.classes_per_week}'
@@ -79,7 +88,9 @@ class Department(models.Model):
 class Section(models.Model):
     section_id = models.CharField(max_length=25, primary_key=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    non_meeting_times = models.ManyToManyField(MeetingTime, related_name="unavailable_for_sections", blank=True)
+    non_meeting_times = models.ManyToManyField(MeetingTime,
+                                               related_name="unavailable_for_sections",
+                                               blank=True)
     course = models.ForeignKey(Course,
                                on_delete=models.CASCADE,
                                blank=True,

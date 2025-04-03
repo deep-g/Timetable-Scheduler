@@ -85,7 +85,12 @@ class Class:
         self.instructor = instructor
 
     def set_meetingTime(self, meetingTime):
-        if meetingTime in self.valid_meeting_times:
+        if isinstance(meetingTime, list):  # For lab courses, handle a list of consecutive slots
+            if all(time in self.valid_meeting_times for time in meetingTime):
+                self.meeting_time = meetingTime
+            else:
+                raise ValueError(f"Invalid meeting times: {meetingTime} for section {self.section}")
+        elif meetingTime in self.valid_meeting_times:
             self.meeting_time = meetingTime
         else:
             raise ValueError(f"Invalid meeting time: {meetingTime} for section {self.section}")
@@ -118,27 +123,80 @@ class Schedule:
             self._fitness = self.calculateFitness()
             self._isFitnessChanged = False
         return self._fitness
-
+    
     def addCourse(self, data, course, courses, dept, section):
         newClass = Class(dept, section, course)
+        
+        if not hasattr(self, "used_slots"):
+            self.used_slots = {}  # Dictionary to track slots for each section
+
+        if section not in self.used_slots:
+            self.used_slots[section] = set()
+
 
         all_meeting_times = data.get_meetingTimes()
         non_meeting_times = list(section.non_meeting_times.all())
         valid_meeting_times = [t for t in all_meeting_times if t not in non_meeting_times]
 
-        if valid_meeting_times:
-            newClass.set_meetingTime(random.choice(valid_meeting_times))
-        else:
-            raise ValueError(f"No valid meeting times available for section {section}")
+        if course.is_lab:  # Handling lab courses separately
+            consecutive_slots = None
+            
+            # Find two available consecutive slots that are not already used
+            for i in range(len(valid_meeting_times) - 1):
+                j = random.randint(0, len(valid_meeting_times) - 2)
+                current_slot = valid_meeting_times[j]
+                next_slot = valid_meeting_times[j + 1]
 
-        newClass.set_room(
-            data.get_rooms()[random.randrange(0, len(data.get_rooms()))])
+                if (
+                    current_slot.day == next_slot.day and
+                    int(next_slot.time.split(':')[0]) == int(current_slot.time.split(':')[0]) + 1 and
+                    (current_slot.day, current_slot.time) not in self.used_slots[section] and
+                    (next_slot.day, next_slot.time) not in self.used_slots[section]
+                ):
+                    consecutive_slots = [current_slot, next_slot]
+                    # Mark slots as used
+                    self.used_slots[section].add((current_slot.day, current_slot.time))
+                    self.used_slots[section].add((next_slot.day, next_slot.time))
+                    break
 
+            if not consecutive_slots:
+                self._numberOfConflicts += 1
+                return
+
+            # Assign the selected consecutive slots to the lab
+            newClass.set_meetingTime(consecutive_slots)
+
+            # Assign a lab room
+            lab_rooms = [room for room in data.get_rooms() if room.room_type == 'lab']
+            if lab_rooms:
+                newClass.set_room(random.choice(lab_rooms))
+            else:
+                raise ValueError(f"No lab rooms available for lab course {course}")
+
+        else:  # Handling lecture courses
+            available_slots = [t for t in valid_meeting_times if (t.day, t.time) not in self.used_slots[section]]
+            
+            if available_slots:
+                selected_time = random.choice(available_slots)
+                newClass.set_meetingTime(selected_time)
+                self.used_slots[section].add((selected_time.day, selected_time.time))
+            else:
+                raise ValueError(f"No valid meeting times available for section {section}")
+
+            # Assign a lecture room
+            lecture_rooms = [room for room in data.get_rooms() if room.room_type == 'lecture']
+            if lecture_rooms:
+                newClass.set_room(random.choice(lecture_rooms))
+            else:
+                raise ValueError(f"No lecture rooms available for course {course}")
+
+        # Assign instructor
         crs_inst = course.instructors.all()
-        newClass.set_instructor(
-            crs_inst[random.randrange(0, len(crs_inst))])
+        selected_instructor = crs_inst[random.randrange(0, len(crs_inst))]
+        newClass.set_instructor(selected_instructor)
 
         self._classes.append(newClass)
+        return
 
     def initialize(self):
         sections = Section.objects.all()
@@ -181,6 +239,19 @@ class Schedule:
                 if (classes[i].section == classes[j].section and \
                     classes[i].meeting_time == classes[j].meeting_time):
                     self._numberOfConflicts += 1
+                    
+                # Lab subjects don't have 2 consecutive slots
+                if classes[i].course.is_lab:
+                    meeting_times = classes[i].meeting_time  # Assuming it's stored as a list
+
+                    if meeting_times is None or len(meeting_times) != 2:
+                        self._numberOfConflicts += 1  # Not exactly 2 slots assigned
+                    else:
+                        day1, time1 = meeting_times[0].day, int(meeting_times[0].time.split(':')[0])
+                        day2, time2 = meeting_times[1].day, int(meeting_times[1].time.split(':')[0])
+
+                        if day1 != day2 or time2 != time1 + 1:  # Not on the same day OR not consecutive
+                            self._numberOfConflicts += 1
 
         return 1 / (self._numberOfConflicts + 1)
 
@@ -276,7 +347,7 @@ def timetable(request):
     geneticAlgorithm = GeneticAlgorithm()
     schedule = population.getSchedules()[0]
 
-    while (schedule.getFitness() != 1.0) and (VARS['generationNum'] < 100):
+    while (schedule.getFitness() != 1.0) and (VARS['generationNum'] < 10):
         if VARS['terminateGens']:
             return HttpResponse('')
 

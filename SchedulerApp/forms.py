@@ -28,7 +28,12 @@ class RoomForm(ModelForm):
     class Meta:
         model = Room
         labels = {'r_number': 'Room Number'}
-        fields = ['r_number', 'seating_capacity']
+        fields = ['r_number', 'seating_capacity', 'room_type']
+        room_type = forms.ChoiceField(
+        choices=Room.ROOM_TYPES,
+        widget=forms.RadioSelect,
+        label="Room Type"
+    )
 
 
 class InstructorForm(ModelForm):
@@ -52,10 +57,14 @@ class MeetingTimeForm(ModelForm):
 class CourseForm(ModelForm):
     class Meta:
         model = Course
-        labels = {'max_numb_students': 'Maximum students'}
+        labels = {'max_numb_students': 'Maximum students', 'is_lab': "Is this a Lab Course?"}
         fields = [
-            'course_number', 'course_name', 'max_numb_students', 'classes_per_week', 'instructors'
+            'course_number', 'course_name', 'max_numb_students', 'is_lab','classes_per_week', 'instructors'
         ]
+        is_lab = forms.BooleanField(
+            required=False, 
+            widget=forms.CheckboxInput,
+        )
 
 
 class DepartmentForm(ModelForm):

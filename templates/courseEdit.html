@@ -19,6 +19,7 @@
           <th>Course Code</th>
           <th>Course Name</th>
           <th>Max students</th>
+          <th>Is Lab Course?</th>
           <th>Classes per week</th>
           <th>Instructors</th>
           <th class="empty"></th>
@@ -31,6 +32,7 @@
           <td>{{crs.course_number}}</td>
           <td>{{crs.course_name}}</td>
           <td>{{crs.max_numb_students}}</td>
+          <td>{{crs.is_lab}}</td>
           <td>{{crs.classes_per_week}}</td>
           <td>{{instructor|dictKey:crs.course_number}}</td>
           <td class="empty">

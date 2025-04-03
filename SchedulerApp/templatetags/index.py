@@ -12,9 +12,19 @@ def dictKey(d, k):
 def sub(s, d, w, t):
     '''Returns the subject-teacher for a department, weekday and time period'''
     for c in s:
-        if c.department.dept_name == d and c.meeting_time.day == w and c.meeting_time.time == t:
-            return f'{c.course.course_name} ({c.instructor.name}) - Room: {c.room.r_number}'
-
+        if c.department.dept_name == d:
+            # Check if meeting_time is a list (for labs)
+            if isinstance(c.meeting_time, list):
+                # Iterate over all meeting times
+                for i, mt in enumerate(c.meeting_time):
+                    if mt.day == w and mt.time == t:
+                        # Ensure lab occupies multiple slots by checking the next meeting time
+                        if i + 1 < len(c.meeting_time):  
+                            return f'{c.course.course_name} (Lab) ({c.instructor.name}) - Room: {c.room.r_number} (Continued)'
+                        return f'{c.course.course_name} (Lab) ({c.instructor.name}) - Room: {c.room.r_number}'
+            else:  # Regular single-hour lecture
+                if c.meeting_time.day == w and c.meeting_time.time == t:
+                    return f'{c.course.course_name} ({c.instructor.name}) - Room: {c.room.r_number}'
     return ''
 
 @register.tag

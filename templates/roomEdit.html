@@ -18,6 +18,7 @@
         <tr class="table-headers">
           <th>Room No.</th>
           <th>Seating Capacity</th>
+          <th>Room Type</th>
           <th class="empty"></th>
         </tr>
       </thead>
@@ -27,6 +28,7 @@
         <tr>
           <td>{{rm.r_number}}</td>
           <td>{{rm.seating_capacity}}</td>
+          <td>{{rm.room_type}}</td>
           <td class="empty">
             <form action="{% url 'deleteroom' rm.id %}" method="post">
               {% csrf_token %}
